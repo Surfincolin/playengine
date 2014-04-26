@@ -69,11 +69,11 @@ mongo.Db.connect(mongoUri, function (err, db) {
 
 function addTag(viewId, evAct) {
     console.log(viewId + ":ACTION:" + evAct);
-    /*infusionsoft.ContactService
+    infusionsoft.ContactService
             .addToGroup(viewId, evAct)
             .done(function(result) {
                 console.log(result);
-            });*/
+            });
 }
 
 app.get('/stats', function(req, res) {
