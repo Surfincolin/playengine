@@ -10,7 +10,8 @@ var infusionsoft = new api.DataContext('pc183', '08595c541d3112ff21d18545b9ef7fc
 //var infusionsoft = new api.DataContext('st109', '415f720a8209bbdda5060635f7f28930');
 
 var mongoUri = process.env.MONGOHQ_URL || 'mongodb://localhost/mydb';
-var BSON = mongo.BSONPure;
+var BSON = require('mongodb').pure().BSON;
+var ObjectID = require('mongodb').ObjectID;
 
 var allowCrossDomain = function(req, res, next) {
   res.header('Access-Control-Allow-Origin', "*");
@@ -25,8 +26,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 function saveRecord(item, callback) {
-
-    mongo.Db.connect(mongoUri, function (err, db) {
+    if (item._id !== undefined) {
+        item._id = new ObjectID(item._id);
+        mongo.Db.connect(mongoUri, function (err, db) {
         db.collection('filstats', function(er, collection) {
             collection.save(item, {safe: true}, function(er,rs) {
                 if (er) {
@@ -38,6 +40,22 @@ function saveRecord(item, callback) {
             });
         });
     });
+    } else {
+    item.created = new Date().getTime();
+    mongo.Db.connect(mongoUri, function (err, db) {
+        db.collection('filstats', function(er, collection) {
+            collection.save(item, {safe: true}, function(er,rs) {
+                if (er) {
+                    console.log(er);
+                } else {
+                    console.log("CREATE RECORD");
+                    callback(rs);
+                }
+            });
+        });
+    });
+
+    }
 }
 
 mongo.Db.connect(mongoUri, function (err, db) {
