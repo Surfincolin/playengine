@@ -6,10 +6,15 @@ var api = require('infusionsoft-api');
 
 var app = express();
 
-//var infusionsoft = new api.DataContext('pc183', '08595c541d3112ff21d18545b9ef7fcd');
-var infusionsoft = new api.DataContext('st109', '415f720a8209bbdda5060635f7f28930');
+var connectedUsers = 0;
+var disconnectedUsers = 0;
+var currentUsers = 0;
 
-var mongoUri = process.env.MONGOHQ_URL || 'mongodb://localhost/mydb';
+var infusionsoft = new api.DataContext('pc183', '08595c541d3112ff21d18545b9ef7fcd');
+//var infusionsoft = new api.DataContext('st109', '415f720a8209bbdda5060635f7f28930');
+
+//var mongoUri = process.env.MONGOHQ_URL || 'mongodb://localhost/mydb';
+var mongoUri = 'mongodb://flipitlive:webcast24@candidate.17.mongolayer.com:10185/app24552715';
 var BSON = require('mongodb').pure().BSON;
 var ObjectID = require('mongodb').ObjectID;
 
@@ -58,14 +63,17 @@ function saveRecord(item, callback) {
     }
 }
 
+function getRecords(callback) {
 mongo.Db.connect(mongoUri, function (err, db) {
     db.collection('filstats', function(er, collection) {
-            collection.find().toArray(function(err, items) {
-                console.log(items);
-                //res.send(items);
+            collection.find({ "watched":{$lte: "28800000"} }).toArray(function(err, items) {
+                //console.log(items);
+                callback(items);
             });
         });
     });
+
+};
 
 function addTag(viewId, evAct) {
     console.log(viewId + ":ACTION:" + evAct);
@@ -76,9 +84,34 @@ function addTag(viewId, evAct) {
             });
 }
 
+app.get('/soniastats', function(req, res) {
+    getRecords(function (results) {
+        res.send(results);
+    });
+
+});
+app.get('/count', function(req, res) {
+    
+    if (req.query.active == 1) {
+        currentUsers = ++connectedUsers - disconnectedUsers;
+        console.log(currentUsers);
+    } else if (req.query.active === 0) {
+        currentUsers = connectedUsers - ++disconnectedUsers;
+        console.log(currentUsers);
+    }
+
+});
+
+app.get('/amount', function(req, res) {
+    
+    res.send({"currentUsers": currentUsers});
+
+});
+
 app.get('/stats', function(req, res) {
-	/*var timeWatched = Math.round(req.query.watched/100)/10;*/
+    /*var timeWatched = Math.round(req.query.watched/100)/10;*/
     var evAct = req.query.evAct;
+
     //console.log(req.query);
     var userInfo = req.query;
     userInfo.evAct = null;
