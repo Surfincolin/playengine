@@ -10,11 +10,9 @@ var connectedUsers = 0;
 var disconnectedUsers = 0;
 var currentUsers = 0;
 
-var infusionsoft = new api.DataContext('pc183', '08595c541d3112ff21d18545b9ef7fcd');
-//var infusionsoft = new api.DataContext('st109', '415f720a8209bbdda5060635f7f28930');
+var infusionsoft = new api.DataContext('appname', 'api key');
 
 //var mongoUri = process.env.MONGOHQ_URL || 'mongodb://localhost/mydb';
-var mongoUri = 'mongodb://flipitlive:webcast24@candidate.17.mongolayer.com:10185/app24552715';
 var BSON = require('mongodb').pure().BSON;
 var ObjectID = require('mongodb').ObjectID;
 
@@ -73,7 +71,7 @@ mongo.Db.connect(mongoUri, function (err, db) {
         });
     });
 
-};
+}
 
 function addTag(viewId, evAct) {
     console.log(viewId + ":ACTION:" + evAct);
